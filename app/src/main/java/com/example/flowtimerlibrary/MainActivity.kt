@@ -61,7 +61,7 @@ class MainActivity : AppCompatActivity() {
             }
 
             if (isPlaying) {
-                timerTicker?.startCount()
+                timerTicker?.resumeCount()
             } else {
                 timerTicker?.pauseCount()
             }

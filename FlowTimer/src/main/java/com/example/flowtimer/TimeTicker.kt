@@ -16,7 +16,8 @@ abstract class TimeTicker(coroutineContext: CoroutineContext = Dispatchers.Main,
     private var countTimeInterval = 1000L
 
     val flowTimer = MutableSharedFlow<Long>()
-    var countJob: Job? = null
+
+    protected var countJob: Job? = null
 
     private var nowTime = 0L
 
@@ -42,6 +43,11 @@ abstract class TimeTicker(coroutineContext: CoroutineContext = Dispatchers.Main,
     }
 
     open fun startCount() {
+        stopCount()
+        countAction()
+    }
+
+    fun resumeCount() {
         cancelCount(false)
         countAction()
     }
@@ -92,7 +98,9 @@ abstract class TimeTicker(coroutineContext: CoroutineContext = Dispatchers.Main,
                 if (needEmitTime != null) {
                     nowTime = needEmitTime
                     flowTimer.emit(needEmitTime)
-                } else cancelCount(false)
+                } else {
+                    cancelCount(false)
+                }
             }.launchIn(this)
         }
         if (countJob?.isCancelled == true) countJob?.start()

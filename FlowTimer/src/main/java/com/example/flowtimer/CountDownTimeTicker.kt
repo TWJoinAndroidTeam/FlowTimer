@@ -30,7 +30,7 @@ class CountDownTimeTicker(
 
         val currentTime = when {
             shouldAddTimeAfterOnPause && systemTimeOnPause != null -> {
-                val firstValueWhenBackResume = nowTime.minus(getTimeNeedAdd()).minus(countTimeInterval)
+                val firstValueWhenBackResume = nowTime.minus(getTimeNeedAdd()).minus(countTimeInterval).coerceAtLeast(0)
                 systemTimeOnPause = null
                 firstValueWhenBackResume
             }
