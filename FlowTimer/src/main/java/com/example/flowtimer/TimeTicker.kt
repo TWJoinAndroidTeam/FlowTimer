@@ -9,40 +9,40 @@ import kotlin.coroutines.CoroutineContext
 
 /**
  * @property countTimeInterval 每一次間格的計算單位，預設為1秒
- * @property countDownTimeStart 從多少時間開始算，假如不設置則為自然計數
  */
 @ObsoleteCoroutinesApi
-abstract class TimeTicker(private val coroutineContext: CoroutineContext = Dispatchers.Main, countTimeInterval: Long? = null, countDownTimeStart: Long? = null) {
+abstract class TimeTicker(coroutineContext: CoroutineContext = Dispatchers.Main, countTimeInterval: Long? = null, private var countDownTimeStart: Long = 0) {
 
     private var countTimeInterval = 1000L
-    protected var countDownTimeStart: Long? = null
 
     val flowTimer = MutableSharedFlow<Long>()
     var countJob: Job? = null
 
-    protected var nowTime = 0L
+    private var nowTime = 0L
 
     private var receiveChannel: ReceiveChannel<Unit>? = null
 
+    protected var isCancelByUser = false
+
+    private val coroutineScope = CoroutineScope(coroutineContext)
 
     init {
-        setCountDownTimer(countTimeInterval, countDownTimeStart)
+        initCountDownTimer(countTimeInterval, countDownTimeStart)
     }
 
     /**
      * @param countTimeInterval 每一次間格的計算單位，預設為1秒
-     * @param countDownTimeStart 從多少時間開始算，假如不設置則為自然計數
      */
-    private fun setCountDownTimer(countTimeInterval: Long? = null, countDownTimeStart: Long? = null) {
+    private fun initCountDownTimer(countTimeInterval: Long? = null, countDownTimeStart: Long) {
         if (countTimeInterval != null) {
             this.countTimeInterval = countTimeInterval
         }
-        this.countDownTimeStart = countDownTimeStart
+
+        this.nowTime = countDownTimeStart
     }
 
     open fun startCount() {
-        cancelCount()
-        nowTime = countDownTimeStart ?: 0
+        cancelCount(false)
         countAction()
     }
 
@@ -50,12 +50,32 @@ abstract class TimeTicker(private val coroutineContext: CoroutineContext = Dispa
         controlCount()
     }
 
-    fun cancelCount() {
+    protected fun cancelCount(isCancelByUser: Boolean) {
+        this.isCancelByUser = isCancelByUser
         countJob?.cancel()
         receiveChannel?.cancel()
     }
 
-    @ObsoleteCoroutinesApi
+    fun pauseCount() {
+        cancelCount(true)
+    }
+
+    fun stopCount() {
+        cancelCount(true)
+        resetCount()
+    }
+
+    fun getNowTime(): Long {
+        return nowTime
+    }
+
+    protected fun resetCount() {
+        coroutineScope.launch {
+            flowTimer.emit(countDownTimeStart)
+        }
+        initCountDownTimer(countTimeInterval, countDownTimeStart)
+    }
+
     private fun tickerFlow(l: Long, context: CoroutineContext): Flow<Unit> {
         receiveChannel?.cancel()
 
@@ -65,26 +85,19 @@ abstract class TimeTicker(private val coroutineContext: CoroutineContext = Dispa
     }
 
 
-    protected fun controlCount() {
-        val coroutineScope = CoroutineScope(coroutineContext)
+    private fun controlCount() {
         countJob = coroutineScope.launch {
             tickerFlow(countTimeInterval, this.coroutineContext).onEach {
-                when {
-                    countDownTimeStart != null -> {
-                        nowTime = nowTime.minus(countTimeInterval).coerceAtLeast(0)
-                        if (nowTime >= 0) {
-                            flowTimer.emit(nowTime)
-                            if (nowTime == 0L) cancelCount()
-                        } else cancelCount()
-                    }
-                    else -> {
-                        nowTime = nowTime.plus(countTimeInterval)
-                        flowTimer.emit(nowTime)
-                    }
-                }
+                val needEmitTime = getNowTime(countTimeInterval, nowTime)
+                if (needEmitTime != null) {
+                    nowTime = needEmitTime
+                    flowTimer.emit(needEmitTime)
+                } else cancelCount(false)
             }.launchIn(this)
         }
         if (countJob?.isCancelled == true) countJob?.start()
     }
 
+
+    abstract fun getNowTime(countTimeInterval: Long, nowTime: Long): Long?
 }

@@ -52,4 +52,8 @@ dependencies {
     def lifecycle_version = "2.6.1"
     implementation "androidx.lifecycle:lifecycle-viewmodel-ktx:$lifecycle_version"
     implementation "androidx.lifecycle:lifecycle-runtime-ktx:$lifecycle_version"
+
+    implementation 'com.github.TWJoinAndroidTeam:CalendarDialogCommander:1.0.7'
+    implementation 'com.github.TWJoinAndroidTeam:BaseRvAdapters:1.1.4'
+
 }

@@ -6,12 +6,22 @@
     android:layout_height="match_parent"
     tools:context=".MainActivity">
 
+    <ImageButton
+        android:id="@+id/img_add"
+        android:layout_width="wrap_content"
+        android:layout_height="0dp"
+        android:layout_margin="5dp"
+        android:src="@drawable/ic_add"
+        app:layout_constraintBottom_toTopOf="@id/txt_time"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
     <TextView
         android:id="@+id/txt_time"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:gravity="center"
-        android:text="00:00:00:000"
+        android:text="00:00:00"
         android:textSize="48sp"
         app:layout_constraintBottom_toTopOf="@id/fitst_guid"
         app:layout_constraintTop_toTopOf="parent" />
@@ -23,6 +33,13 @@
         android:orientation="horizontal"
         app:layout_constraintGuide_percent="0.3" />
 
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/rv"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        app:layout_constraintBottom_toBottomOf="@id/second_guid"
+        app:layout_constraintTop_toTopOf="@id/fitst_guid" />
+
 
     <androidx.constraintlayout.widget.Guideline
         android:id="@+id/second_guid"
@@ -32,28 +49,28 @@
         app:layout_constraintGuide_percent="0.85" />
 
     <ImageButton
-        android:id="@+id/img_play_or_stop"
+        android:id="@+id/img_play_or_pause"
         android:layout_width="0dp"
         android:layout_height="0dp"
         android:layout_margin="10dp"
         android:src="@drawable/ic_play_circle"
         app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toStartOf="@+id/img_add"
+        app:layout_constraintEnd_toStartOf="@+id/img_stop"
         app:layout_constraintHorizontal_bias="0.5"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/second_guid" />
 
 
     <ImageButton
-        android:id="@+id/img_add"
+        android:id="@+id/img_stop"
         android:layout_width="0dp"
         android:layout_height="0dp"
         android:layout_margin="10dp"
-        android:src="@drawable/ic_add"
+        android:src="@drawable/ic_stop"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.5"
-        app:layout_constraintStart_toEndOf="@+id/img_play_or_stop"
+        app:layout_constraintStart_toEndOf="@+id/img_play_or_pause"
         app:layout_constraintTop_toBottomOf="@id/second_guid" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

@@ -7,69 +7,69 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ObsoleteCoroutinesApi
 import kotlin.coroutines.CoroutineContext
 
+
 /**
  * @param shouldAddTimeAfterOnPause 是否需要計算 pause APP的時間
  */
-@ObsoleteCoroutinesApi
-class ObserveLifeCycleTimeTicker(
+@OptIn(ObsoleteCoroutinesApi::class)
+class NaturalCountTimeTicker(
     lifecycleOwner: LifecycleOwner,
     private val shouldAddTimeAfterOnPause: Boolean,
     coroutineContext: CoroutineContext = Dispatchers.Main,
-    countTimeInterval: Long? = null,
-    countDownTimeStart: Long? = null
-) :
-    TimeTicker(coroutineContext, countTimeInterval, countDownTimeStart), LifecycleEventObserver {
+    countTimeInterval: Long? = null
+) : TimeTicker(coroutineContext, countTimeInterval), LifecycleEventObserver {
 
+    private var systemTimeOnPause: Long? = null
 
-    var isAlreadyStart = false
-
-    private var systemTimeNow: Long? = null
+    private val needHandleOnResume: Boolean get() = systemTimeOnPause != null && !isCancelByUser
 
     init {
         lifecycleOwner.lifecycle.addObserver(this)
     }
 
     override fun startCount() {
-        systemTimeNow = null
+        systemTimeOnPause = null
         super.startCount()
     }
 
-    override fun countAction() {
+    override fun getNowTime(countTimeInterval: Long, nowTime: Long): Long? {
 
-        if (shouldAddTimeAfterOnPause) {
-
-            val saveTime = systemTimeNow
-
-            if (saveTime != null) {
-                val systemTimeNow = System.currentTimeMillis()
-                nowTime -= (systemTimeNow - saveTime)
+        val currentTime = when {
+            shouldAddTimeAfterOnPause && systemTimeOnPause != null -> {
+                val firstValueWhenBackResume = nowTime.plus(getTimeNeedAdd()).plus(countTimeInterval)
+                systemTimeOnPause = null
+                firstValueWhenBackResume
             }
+            else -> nowTime.plus(countTimeInterval)
         }
 
-        super.countAction()
+        return currentTime
+    }
+
+    private fun getTimeNeedAdd(): Long {
+
+        val systemTimeNow = System.currentTimeMillis()
+
+        return systemTimeNow - systemTimeOnPause!!
     }
 
     private fun onLifeResume() {
-        //代表時間到
-        if (countDownTimeStart != null && nowTime == 0L) return
-        if (isAlreadyStart) countAction()
+        if (needHandleOnResume) countAction()
     }
 
     private fun onLifePause() {
 
-        if (countJob?.isActive == false) return
+        if (isCancelByUser) return
 
-        if (shouldAddTimeAfterOnPause) systemTimeNow = System.currentTimeMillis()
+        if (shouldAddTimeAfterOnPause) systemTimeOnPause = System.currentTimeMillis()
 
-        if (countJob?.isActive == true) {
-            isAlreadyStart = true
-        }
-
-        cancelCount()
+        cancelCount(false)
     }
 
+
     private fun onLifeDestroy() {
-        cancelCount()
+        cancelCount(false)
+        resetCount()
     }
 
     override fun onStateChanged(source: LifecycleOwner, event: Lifecycle.Event) {
@@ -82,7 +82,9 @@ class ObserveLifeCycleTimeTicker(
             Lifecycle.Event.ON_PAUSE -> {
                 onLifePause()
             }
-            Lifecycle.Event.ON_STOP -> {}
+            Lifecycle.Event.ON_STOP -> {
+
+            }
             Lifecycle.Event.ON_DESTROY -> {
                 onLifeDestroy()
             }
