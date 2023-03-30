@@ -8,6 +8,7 @@ import kotlinx.coroutines.ObsoleteCoroutinesApi
 import kotlin.coroutines.CoroutineContext
 
 /**
+ * 倒計時的timer，當倒計時為0時，會取消計時行為
  * @param shouldAddTimeAfterOnPause 是否需要計算 pause APP的時間
  */
 @ObsoleteCoroutinesApi

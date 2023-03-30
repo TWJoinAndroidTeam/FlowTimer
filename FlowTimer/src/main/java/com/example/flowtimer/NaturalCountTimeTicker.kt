@@ -9,6 +9,7 @@ import kotlin.coroutines.CoroutineContext
 
 
 /**
+ * 用於正向記時的ticker，沒有關掉的話，會一直記時下去
  * @param shouldAddTimeAfterOnPause 是否需要計算 pause APP的時間
  */
 @OptIn(ObsoleteCoroutinesApi::class)
