@@ -55,7 +55,7 @@ class MainActivity : AppCompatActivity() {
                 if (timeInfo.hourOfDay == 0 && timeInfo.minute == 0) {
                     timerTicker = NaturalCountTimeTicker(this, true, countTimeInterval = 1000L)
                 } else {
-                    timerTicker = CountDownTimeTicker(this, true, countTimeInterval = 1000L, countDownTimeStart = pattern.turnDateTimeStringToDate(binding.txtTime.text.toString())?.time ?: 0L)
+                    timerTicker = CountDownTimeTicker(this, false, countTimeInterval = 1000L, countDownTimeStart = pattern.turnDateTimeStringToDate(binding.txtTime.text.toString())?.time ?: 0L)
                 }
                 startObserve()
             }

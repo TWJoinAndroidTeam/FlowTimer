@@ -17,8 +17,6 @@ class CountDownTimeTicker(
 
     private var systemTimeOnPause: Long? = null
 
-    private val needHandleOnResume: Boolean get() = systemTimeOnPause != null && !isCancelByUser
-
     init {
         lifecycleOwner.lifecycle.addObserver(this)
     }
@@ -50,7 +48,7 @@ class CountDownTimeTicker(
     }
 
     private fun onLifeResume() {
-        if (needHandleOnResume) countAction()
+        if (!isCancelByUser) countAction()
     }
 
     private fun onLifePause() {
