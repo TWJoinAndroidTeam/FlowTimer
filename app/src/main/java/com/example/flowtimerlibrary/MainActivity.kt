@@ -77,18 +77,14 @@ class MainActivity : AppCompatActivity() {
         }
 
         mainViewModel.flowShowCalendar.launchWhenCreatedFlow(this) {
-
-            CalendarDialogUtil.showCalendarTimeDialog(
+            timeInfo = CalendarDialogUtil.waitCalendarTimeDialogResponse(
                 this, TimePickerType.NormalTimePicker(true, R.style.CustomTimePickerDialog)
-            ) { view, hourOfDay, minute ->
-                this@MainActivity.timeInfo = TimeInfo(hourOfDay, minute)
-                val calendar = Calendar.getInstance()
-                calendar.timeZone = pattern.timeZone
-                calendar.set(0, 0, 0, hourOfDay, minute, 0)
-                binding.txtTime.text = pattern.getCalenderString(calendar)
-            }
+            ) { }
+            val calendar = Calendar.getInstance()
+            calendar.timeZone = pattern.timeZone
+            calendar.set(0, 0, 0, timeInfo.hourOfDay, timeInfo.minute, 0)
+            binding.txtTime.text = pattern.getCalenderString(calendar)
         }
-
 
         mainViewModel.flowPlayState.launchWhenCreatedFlow(this) {
 
