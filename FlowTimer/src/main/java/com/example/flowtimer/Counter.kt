@@ -11,13 +11,13 @@ import kotlin.coroutines.CoroutineContext
  * @property countTimeInterval 每一次間格的計算單位，預設為1秒
  */
 @ObsoleteCoroutinesApi
-abstract class TimeTicker(coroutineContext: CoroutineContext = Dispatchers.Main, countTimeInterval: Long? = null, private var countDownTimeStart: Long = 0) {
+abstract class Counter(coroutineContext: CoroutineContext = Dispatchers.Main, countTimeInterval: Long? = null, private var countDownTimeStart: Long = 0) {
 
     private var countTimeInterval = 1000L
 
     val flowTimer = MutableSharedFlow<Long>()
 
-    protected var countJob: Job? = null
+    private var countJob: Job? = null
 
     private var nowTime = 0L
 
@@ -34,12 +34,12 @@ abstract class TimeTicker(coroutineContext: CoroutineContext = Dispatchers.Main,
     /**
      * @param countTimeInterval 每一次間格的計算單位，預設為1秒
      */
-    private fun initCountDownTimer(countTimeInterval: Long? = null, countDownTimeStart: Long) {
+    private fun initCountDownTimer(countTimeInterval: Long? = null, countTimeStart: Long) {
         if (countTimeInterval != null) {
             this.countTimeInterval = countTimeInterval
         }
 
-        this.nowTime = countDownTimeStart
+        this.nowTime = countTimeStart
     }
 
     open fun startCount() {
@@ -90,8 +90,8 @@ abstract class TimeTicker(coroutineContext: CoroutineContext = Dispatchers.Main,
         return receiveChannel!!.receiveAsFlow()
     }
 
-
     private fun controlCount() {
+
         countJob = coroutineScope.launch {
             tickerFlow(countTimeInterval, this.coroutineContext).onEach {
                 val needEmitTime = getNowTime(countTimeInterval, nowTime)

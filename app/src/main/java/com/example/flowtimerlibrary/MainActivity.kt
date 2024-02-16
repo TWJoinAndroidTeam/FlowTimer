@@ -12,10 +12,9 @@ import com.example.caledardialogcommander.model.TimePickerType
 import com.example.caledardialogcommander.ui.CalendarDialogUtil
 import com.example.flowtimer.CountDownTimeTicker
 import com.example.flowtimer.NaturalCountTimeTicker
-import com.example.flowtimer.TimeTicker
+import com.example.flowtimer.Counter
 import com.example.flowtimerlibrary.databinding.ActivityMainBinding
 import kotlinx.coroutines.ObsoleteCoroutinesApi
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import java.util.*
 
@@ -24,7 +23,7 @@ class MainActivity : AppCompatActivity() {
 
     private lateinit var binding: ActivityMainBinding
 
-    private var timerTicker: TimeTicker? = null
+    private var timerTicker: Counter? = null
 
     private val pattern = "HH:mm:ss".toTimePattern()
 
@@ -94,14 +93,14 @@ class MainActivity : AppCompatActivity() {
 
                     binding.imgPlayOrPause.setImageResource(R.drawable.ic_play_circle)
                 }
+
                 is PlayState.Playing -> {
 
                     if (timerTicker == null) {
-                        if (timeInfo.hourOfDay == 0 && timeInfo.minute == 0) {
-                            timerTicker = NaturalCountTimeTicker(this, true, countTimeInterval = 1000L)
+                        timerTicker = if (timeInfo.hourOfDay == 0 && timeInfo.minute == 0) {
+                            NaturalCountTimeTicker(countTimeInterval = 1000L)
                         } else {
-                            timerTicker =
-                                CountDownTimeTicker(this, false, countTimeInterval = 1000L, countDownTimeStart = pattern.turnDateTimeStringToDate(binding.txtTime.text.toString())?.time ?: 0L)
+                            CountDownTimeTicker(countTimeInterval = 1000L, countDownTimeStart = pattern.turnDateTimeStringToDate(binding.txtTime.text.toString())?.time ?: 0L)
                         }
                         startTimerObserve()
                     }
@@ -110,6 +109,7 @@ class MainActivity : AppCompatActivity() {
 
                     binding.imgPlayOrPause.setImageResource(R.drawable.ic_pause_circle)
                 }
+
                 is PlayState.Stop -> {
 
                     timerTicker?.stopCount()

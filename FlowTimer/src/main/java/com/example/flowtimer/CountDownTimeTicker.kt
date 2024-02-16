@@ -13,13 +13,15 @@ import kotlin.coroutines.CoroutineContext
  */
 @ObsoleteCoroutinesApi
 class CountDownTimeTicker(
-    lifecycleOwner: LifecycleOwner, private val shouldAddTimeAfterOnPause: Boolean, coroutineContext: CoroutineContext = Dispatchers.Main, countTimeInterval: Long? = null, countDownTimeStart: Long
-) : TimeTicker(coroutineContext, countTimeInterval, countDownTimeStart), LifecycleEventObserver {
+    coroutineContext: CoroutineContext = Dispatchers.Main, countTimeInterval: Long? = null, countDownTimeStart: Long
+) : Counter(coroutineContext, countTimeInterval, countDownTimeStart), LifecycleEventObserver {
 
     private var systemTimeOnPause: Long? = null
+    private var shouldAddTimeAfterOnPause: Boolean = false
 
-    init {
+    fun addLifecycleObserve(lifecycleOwner: LifecycleOwner, shouldAddTimeAfterOnPause: Boolean) {
         lifecycleOwner.lifecycle.addObserver(this)
+        this.shouldAddTimeAfterOnPause = shouldAddTimeAfterOnPause
     }
 
     override fun startCount() {
@@ -35,6 +37,7 @@ class CountDownTimeTicker(
                 systemTimeOnPause = null
                 firstValueWhenBackResume
             }
+
             else -> nowTime.minus(countTimeInterval)
         }
 
@@ -73,15 +76,20 @@ class CountDownTimeTicker(
             Lifecycle.Event.ON_RESUME -> {
                 onLifeResume()
             }
+
             Lifecycle.Event.ON_PAUSE -> {
                 onLifePause()
             }
+
             Lifecycle.Event.ON_STOP -> {
 
             }
+
             Lifecycle.Event.ON_DESTROY -> {
+                source.lifecycle.removeObserver(this)
                 onLifeDestroy()
             }
+
             Lifecycle.Event.ON_ANY -> {}
         }
     }
