@@ -14,16 +14,17 @@ import kotlin.coroutines.CoroutineContext
  */
 @OptIn(ObsoleteCoroutinesApi::class)
 class NaturalCountTimeTicker(
-    lifecycleOwner: LifecycleOwner,
-    private val shouldAddTimeAfterOnPause: Boolean,
     coroutineContext: CoroutineContext = Dispatchers.Main,
     countTimeInterval: Long? = null
-) : TimeTicker(coroutineContext, countTimeInterval), LifecycleEventObserver {
+) : Counter(coroutineContext, countTimeInterval), LifecycleEventObserver {
 
     private var systemTimeOnPause: Long? = null
 
-    init {
+    private var shouldAddTimeAfterOnPause: Boolean = false
+
+    fun addLifecycleObserve(lifecycleOwner: LifecycleOwner, shouldAddTimeAfterOnPause: Boolean) {
         lifecycleOwner.lifecycle.addObserver(this)
+        this.shouldAddTimeAfterOnPause = shouldAddTimeAfterOnPause
     }
 
     override fun startCount() {
@@ -31,7 +32,7 @@ class NaturalCountTimeTicker(
         super.startCount()
     }
 
-    override fun getNowTime(countTimeInterval: Long, nowTime: Long): Long? {
+    override fun getNowTime(countTimeInterval: Long, nowTime: Long): Long {
 
         val currentTime = when {
             shouldAddTimeAfterOnPause && systemTimeOnPause != null -> {
@@ -39,6 +40,7 @@ class NaturalCountTimeTicker(
                 systemTimeOnPause = null
                 firstValueWhenBackResume
             }
+
             else -> nowTime.plus(countTimeInterval)
         }
 
@@ -78,15 +80,19 @@ class NaturalCountTimeTicker(
             Lifecycle.Event.ON_RESUME -> {
                 onLifeResume()
             }
+
             Lifecycle.Event.ON_PAUSE -> {
                 onLifePause()
             }
+
             Lifecycle.Event.ON_STOP -> {
 
             }
+
             Lifecycle.Event.ON_DESTROY -> {
                 onLifeDestroy()
             }
+
             Lifecycle.Event.ON_ANY -> {}
         }
     }
