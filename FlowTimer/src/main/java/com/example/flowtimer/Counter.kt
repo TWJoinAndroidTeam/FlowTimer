@@ -13,13 +13,13 @@ import kotlin.coroutines.CoroutineContext
 @ObsoleteCoroutinesApi
 abstract class Counter(coroutineContext: CoroutineContext = Dispatchers.Main, countTimeInterval: Long? = null, private var countDownTimeStart: Long = 0) {
 
-    private var countTimeInterval = 1000L
+    protected var countTimeInterval = countTimeInterval ?: 1000
 
     val flowTimer = MutableSharedFlow<Long>()
 
     private var countJob: Job? = null
 
-    private var nowTime = 0L
+    private var nowTime = countDownTimeStart
 
     private var receiveChannel: ReceiveChannel<Unit>? = null
 
@@ -27,19 +27,8 @@ abstract class Counter(coroutineContext: CoroutineContext = Dispatchers.Main, co
 
     private val coroutineScope = CoroutineScope(coroutineContext)
 
-    init {
-        initCountDownTimer(countTimeInterval, countDownTimeStart)
-    }
-
-    /**
-     * @param countTimeInterval 每一次間格的計算單位，預設為1秒
-     */
-    private fun initCountDownTimer(countTimeInterval: Long? = null, countTimeStart: Long) {
-        if (countTimeInterval != null) {
-            this.countTimeInterval = countTimeInterval
-        }
-
-        this.nowTime = countTimeStart
+    private fun resetTimer() {
+        this.nowTime = countDownTimeStart
     }
 
     open fun startCount() {
@@ -71,7 +60,7 @@ abstract class Counter(coroutineContext: CoroutineContext = Dispatchers.Main, co
         resetCount()
     }
 
-    fun getNowTime(): Long {
+    fun getNewNowTime(): Long {
         return nowTime
     }
 
@@ -79,7 +68,8 @@ abstract class Counter(coroutineContext: CoroutineContext = Dispatchers.Main, co
         coroutineScope.launch {
             flowTimer.emit(countDownTimeStart)
         }
-        initCountDownTimer(countTimeInterval, countDownTimeStart)
+
+        resetTimer()
     }
 
     private fun tickerFlow(l: Long, context: CoroutineContext): Flow<Unit> {
@@ -94,7 +84,7 @@ abstract class Counter(coroutineContext: CoroutineContext = Dispatchers.Main, co
 
         countJob = coroutineScope.launch {
             tickerFlow(countTimeInterval, this.coroutineContext).onEach {
-                val needEmitTime = getNowTime(countTimeInterval, nowTime)
+                val needEmitTime = getNewNowTime(nowTime)
                 if (needEmitTime != null) {
                     nowTime = needEmitTime
                     flowTimer.emit(needEmitTime)
@@ -107,5 +97,5 @@ abstract class Counter(coroutineContext: CoroutineContext = Dispatchers.Main, co
     }
 
 
-    abstract fun getNowTime(countTimeInterval: Long, nowTime: Long): Long?
+    abstract fun getNewNowTime(oloNowTime: Long): Long?
 }
