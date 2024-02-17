@@ -29,16 +29,16 @@ class CountDownTimeTicker(
         super.startCount()
     }
 
-    override fun getNowTime(countTimeInterval: Long, nowTime: Long): Long? {
+    override fun getNewNowTime(oloNowTime: Long): Long? {
 
         val currentTime = when {
             shouldAddTimeAfterOnPause && systemTimeOnPause != null -> {
-                val firstValueWhenBackResume = nowTime.minus(getTimeNeedAdd()).minus(countTimeInterval).coerceAtLeast(0)
+                val firstValueWhenBackResume = oloNowTime.minus(getTimeNeedAdd()).minus(countTimeInterval).coerceAtLeast(0)
                 systemTimeOnPause = null
                 firstValueWhenBackResume
             }
 
-            else -> nowTime.minus(countTimeInterval)
+            else -> oloNowTime.minus(countTimeInterval)
         }
 
         return if (currentTime >= 0) currentTime else null

@@ -32,16 +32,16 @@ class NaturalCountTimeTicker(
         super.startCount()
     }
 
-    override fun getNowTime(countTimeInterval: Long, nowTime: Long): Long {
+    override fun getNewNowTime(oloNowTime: Long): Long {
 
         val currentTime = when {
             shouldAddTimeAfterOnPause && systemTimeOnPause != null -> {
-                val firstValueWhenBackResume = nowTime.plus(getTimeNeedAdd()).plus(countTimeInterval)
+                val firstValueWhenBackResume = oloNowTime.plus(getTimeNeedAdd()).plus(countTimeInterval)
                 systemTimeOnPause = null
                 firstValueWhenBackResume
             }
 
-            else -> nowTime.plus(countTimeInterval)
+            else -> oloNowTime.plus(countTimeInterval)
         }
 
         return currentTime
