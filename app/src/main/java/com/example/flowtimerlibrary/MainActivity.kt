@@ -99,12 +99,12 @@ class MainActivity : AppCompatActivity() {
                     if (timerTicker == null) {
                         timerTicker = if (timeInfo.hourOfDay == 0 && timeInfo.minute == 0) {
                             NaturalCountTimeTicker(countTimeInterval = 1000L).let {
-                                it.addLifecycleObserve(this,false)
+                                it.addLifecycleObserve(this, false)
                                 it
                             }
                         } else {
                             CountDownTimeTicker(countTimeInterval = 1000L, countDownTimeStart = pattern.turnDateTimeStringToDate(binding.txtTime.text.toString())?.time ?: 0L).let {
-                                it.addLifecycleObserve(this,false)
+                                it.addLifecycleObserve(this, false)
                                 it
                             }
                         }

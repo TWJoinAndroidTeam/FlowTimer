@@ -52,12 +52,12 @@ class CountDownTimeTicker(
     }
 
     private fun onLifeResume() {
-        if (!isCancelByUser) countAction()
+        if (isCancelByUser== false) countAction()
     }
 
     private fun onLifePause() {
 
-        if (isCancelByUser) return
+        if (isCancelByUser==true) return
 
         if (shouldAddTimeAfterOnPause) systemTimeOnPause = System.currentTimeMillis()
 

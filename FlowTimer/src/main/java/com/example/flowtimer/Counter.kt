@@ -23,7 +23,7 @@ abstract class Counter(coroutineContext: CoroutineContext = Dispatchers.Main, co
 
     private var receiveChannel: ReceiveChannel<Unit>? = null
 
-    protected var isCancelByUser = false
+    protected var isCancelByUser: Boolean? = null
 
     private val coroutineScope = CoroutineScope(coroutineContext)
 
@@ -60,7 +60,7 @@ abstract class Counter(coroutineContext: CoroutineContext = Dispatchers.Main, co
         resetCount()
     }
 
-    fun getNewNowTime(): Long {
+    fun getNowTime(): Long {
         return nowTime
     }
 
@@ -93,6 +93,7 @@ abstract class Counter(coroutineContext: CoroutineContext = Dispatchers.Main, co
                 }
             }.launchIn(this)
         }
+
         if (countJob?.isCancelled == true) countJob?.start()
     }
 
