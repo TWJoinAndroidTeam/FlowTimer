@@ -6,6 +6,7 @@ import androidx.lifecycle.LifecycleOwner
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ObsoleteCoroutinesApi
 import kotlin.coroutines.CoroutineContext
+import kotlin.math.absoluteValue
 
 /**
  * 倒計時的timer，當倒計時為0時，會取消計時行為
@@ -13,7 +14,7 @@ import kotlin.coroutines.CoroutineContext
  */
 @ObsoleteCoroutinesApi
 class CountDownTimeTicker(
-    coroutineContext: CoroutineContext = Dispatchers.Main, countTimeInterval: Long? = null, countDownTimeStart: Long
+    coroutineContext: CoroutineContext = Dispatchers.Main, countTimeInterval: Long? = null, countDownTimeStart: Long, private var endTime: Long = 0
 ) : Counter(coroutineContext, countTimeInterval, countDownTimeStart), LifecycleEventObserver {
 
     private var systemTimeOnPause: Long? = null
@@ -41,7 +42,7 @@ class CountDownTimeTicker(
             else -> oloNowTime.minus(countTimeInterval)
         }
 
-        return if (currentTime >= 0) currentTime else null
+        return if (currentTime >= endTime) currentTime else if (currentTime.absoluteValue < countTimeInterval) endTime else null
     }
 
     private fun getTimeNeedAdd(): Long {
@@ -52,12 +53,12 @@ class CountDownTimeTicker(
     }
 
     private fun onLifeResume() {
-        if (isCancelByUser== false) countAction()
+        if (isCancelByUser == false) countAction()
     }
 
     private fun onLifePause() {
 
-        if (isCancelByUser==true) return
+        if (isCancelByUser == true) return
 
         if (shouldAddTimeAfterOnPause) systemTimeOnPause = System.currentTimeMillis()
 
