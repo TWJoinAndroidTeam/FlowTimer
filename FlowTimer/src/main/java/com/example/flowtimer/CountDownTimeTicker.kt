@@ -42,7 +42,7 @@ class CountDownTimeTicker(
             else -> oloNowTime.minus(countTimeInterval)
         }
 
-        return if (currentTime >= endTime) currentTime else if (currentTime.absoluteValue < countTimeInterval) endTime else null
+        return if (currentTime >= endTime || currentTime.absoluteValue < countTimeInterval) currentTime else null
     }
 
     private fun getTimeNeedAdd(): Long {
